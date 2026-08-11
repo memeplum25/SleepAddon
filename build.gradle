@@ -1,0 +1,92 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            name = "forge"
+            url = 'https://maven.minecraftforge.net/'
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+    }
+}
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+version = project.addonVersion
+group = project.modPackageName
+archivesBaseName = project.addonName
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+def generatedSourcesDir = file("$buildDir/generated/sources/${project.addonId}")
+def buildConfigPackage = project.modPackageName
+
+task generateBuildConfig {
+    outputs.dir generatedSourcesDir
+
+    doLast {
+        generatedSourcesDir.mkdirs()
+
+        def packagePath = buildConfigPackage.replace('.', '/')
+
+        file("$generatedSourcesDir/$packagePath/BuildConfig.java").with {
+            parentFile.mkdirs()
+            text = """
+package ${buildConfigPackage};
+
+public final class BuildConfig {
+    public static final String ADDON_ID = "${project.addonId}";
+    public static final String ADDON_NAME = "${project.addonName}";
+    public static final String VERSION = "${project.version}";
+    public static final String TARGET_MWE_VERSION = "${project.targetMWEVersion}";
+}
+"""
+        }
+    }
+}
+
+compileJava.dependsOn generateBuildConfig
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+            srcDir generatedSourcesDir
+        }
+        resources.srcDirs = ['src/main/resources']
+    }
+}
+
+compileJava {
+    options.encoding = "UTF-8"
+}
+
+minecraft {
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+    mappings = "stable_22"
+    makeObfSourceJar = false
+}
+
+runClient {
+    // disables the updater and shows hidden configs
+    // when working in dev environment
+    jvmArgs += [
+            "-Dmwe.disableUpdater=true"
+            , "-Dconfig.lib.showHidden=true"
+    ]
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation "com.github.Alexdoru:MWE:${project.targetMWEVersion}"
+}
+
+jar {
+    manifest.attributes("FMLCorePlugin": "${project.modPackageName}.AddonBootstrap")
+}
