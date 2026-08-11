@@ -34,7 +34,7 @@ Std Addon 的主要变更记录在此文件中。
 
 #### 技术与配置
 
-- Addon 包名为 `me.standonts`，显示名称为 `Std Addon`。
+- Addon 包名为 `me.standonts`，显示名称为 `Sleep Addon`。
 - 使用 MWE 4.6 的公开 Tasks、Squad、Final Kills、Scoreboard、Player、HUD 和 Config API。
 - Ghost Block Fix 使用 ASM 监听客户端挖掘包与服务端单方块/多方块更新包，并隔离 Hook 异常以保护网络处理。
 - ASM 注入兼容开发、SRG 和正式混淆环境的方法名与描述符。
@@ -69,7 +69,7 @@ Std Addon 的主要变更记录在此文件中。
 
 #### Technical And Configuration
 
-- The addon package is `me.standonts` and the display name is `Std Addon`.
+- The addon package is `me.standonts` and the display name is `Sleep Addon`.
 - Integrated with the public Tasks, Squad, Final Kills, Scoreboard, Player, HUD, and Config APIs from MWE 4.6.
 - Ghost Block Fix uses ASM to observe outgoing digging packets and incoming single/multi-block updates, with hook exceptions isolated from network handling.
 - ASM injection supports development, SRG, and production-obfuscated method names and descriptors.
