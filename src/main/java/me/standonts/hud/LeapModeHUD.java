@@ -63,7 +63,7 @@ public final class LeapModeHUD extends AddonHud {
         }
         MWClass playerClass = MWEApi.Player.getPlayerInfo(MC.thePlayer).getMWClass();
         if (playerClass == null) {
-            playerClass = MWClass.ofPlayer(MC.thePlayer.getUniqueID());
+            playerClass = MWClass.ofPlayer(MC.thePlayer.getName());
         }
         return playerClass == MWClass.SPIDER;
     }

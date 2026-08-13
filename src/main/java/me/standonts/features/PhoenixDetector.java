@@ -50,7 +50,12 @@ public final class PhoenixDetector {
             }
 
             UUID uuid = info.getGameProfile().getId();
-            PhoenixState state = STATES.computeIfAbsent(uuid, ignored -> new PhoenixState(0L));
+            PhoenixState state = STATES.get(uuid);
+            if (state == null) {
+                state = new PhoenixState(0L);
+                STATES.put(uuid, state);
+                FeatureUtil.refreshName(uuid);
+            }
             if (state.used) {
                 continue;
             }
@@ -103,6 +108,7 @@ public final class PhoenixDetector {
             PhoenixState previous = STATES.get(player.getUniqueID());
             if (previous == null) {
                 STATES.put(player.getUniqueID(), new PhoenixState(System.currentTimeMillis()));
+                FeatureUtil.refreshName(player.getUniqueID());
             } else if (!previous.used) {
                 previous.joinedAt = System.currentTimeMillis();
                 previous.riding = false;
@@ -125,8 +131,12 @@ public final class PhoenixDetector {
             return null;
         }
         NetworkPlayerInfo info = MC.getNetHandler().getPlayerInfo(playerName);
-        PhoenixState state = info == null || info.getGameProfile() == null
-                ? null : STATES.get(info.getGameProfile().getId());
+        return info == null || info.getGameProfile() == null
+                ? null : getResurrectionIcon(info.getGameProfile().getId());
+    }
+
+    public static String getResurrectionIcon(UUID uuid) {
+        PhoenixState state = uuid == null ? null : STATES.get(uuid);
         if (state == null) {
             return null;
         }

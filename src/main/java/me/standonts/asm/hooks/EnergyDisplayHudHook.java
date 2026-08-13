@@ -43,9 +43,6 @@ public final class EnergyDisplayHudHook {
 
     private static MWClass resolveClass(EntityPlayer player) {
         MWClass mwClass = MWEApi.Player.getPlayerInfo(player).getMWClass();
-        if (mwClass == null) {
-            mwClass = MWClass.ofPlayer(player.getUniqueID());
-        }
         return mwClass == null ? MWClass.ofPlayer(player.getName()) : mwClass;
     }
 

@@ -1,6 +1,7 @@
 package me.standonts.features;
 
 import fr.alexdoru.mwe.api.MWEApi;
+import fr.alexdoru.mwe.data.PlayerDataManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.player.EntityPlayer;
@@ -49,9 +50,25 @@ final class FeatureUtil {
     }
 
     static void refreshName(UUID uuid) {
+        if (uuid == null) {
+            return;
+        }
+        if (MC.getNetHandler() != null) {
+            NetworkPlayerInfo info = MC.getNetHandler().getPlayerInfo(uuid);
+            if (info != null) {
+                PlayerDataManager.updatePlayerDataAndEntityData(info);
+                return;
+            }
+        }
         EntityPlayer player = findPlayer(uuid);
         if (player != null) {
             player.refreshDisplayName();
+        }
+    }
+
+    static void refreshAllNames() {
+        if (MC.theWorld != null && MC.getNetHandler() != null) {
+            PlayerDataManager.refreshAllNamesInWorld();
         }
     }
 

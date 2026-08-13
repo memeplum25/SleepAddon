@@ -45,6 +45,10 @@ public final class PotionDetector {
                 cacheName(playerName, uuid);
             }
         }
+        return getUsedPotsCount(uuid);
+    }
+
+    public static int getUsedPotsCount(UUID uuid) {
         PotionState state = uuid == null ? null : STATES.get(uuid);
         return state == null ? 0 : state.usedPots;
     }

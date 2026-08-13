@@ -18,6 +18,7 @@ public class AddonBootstrap implements IFMLLoadingPlugin {
                 "me.standonts.asm.SquadHealthHudTransformer",
                 "me.standonts.asm.BaseLocationHudTransformer",
                 "me.standonts.asm.TabNameExtraInfoTransformer",
+                "me.standonts.asm.FinalKillCounterTransformer",
                 "me.standonts.asm.GhostBlockChangeTransformer",
                 "me.standonts.asm.NetworkManagerSendPacketTransformer",
                 "me.standonts.asm.EnergyDisplayHudTransformer"

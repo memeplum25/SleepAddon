@@ -20,12 +20,14 @@ public class ExampleConfig {
     @ConfigProperty(
             category = "Sleep Addon",
             name = "Potion count on nametags",
+            dependsOn = "Potion detector",
             comment = "Show tracked healing potion usage above player nametags")
     public static boolean showPotionUsedOnNametags = true;
 
     @ConfigProperty(
             category = "Sleep Addon",
             name = "Potion count in tablist",
+            dependsOn = "Potion detector",
             comment = "Append tracked healing potion usage to player names in the tablist")
     public static boolean showPotionUsedInTablist = true;
 
@@ -36,6 +38,13 @@ public class ExampleConfig {
     public static boolean showFinalKillsOnNametags = true;
 
     @ConfigProperty(
+            category = "Final Kill Counter",
+            subCategory = "HUD",
+            name = "Only DM counts",
+            comment = "Only count final kills during deathmatch")
+    public static boolean onlyDMCounts = true;
+
+    @ConfigProperty(
             category = "Sleep Addon",
             name = "DeNick",
             comment = "Resolve duplicate nick entries through the Mojang profile API")
@@ -44,6 +53,7 @@ public class ExampleConfig {
     @ConfigProperty(
             category = "Sleep Addon",
             name = "DeNick debug logging",
+            dependsOn = "DeNick",
             comment = "Write detailed DeNick resolution information to the game log")
     public static boolean denickDebugLogging;
 
@@ -56,6 +66,7 @@ public class ExampleConfig {
     @ConfigProperty(
             category = "Sleep Addon",
             name = "Extra diamond gear icons in tablist",
+            dependsOn = "Detect extra diamond gear",
             comment = "Show unexpected diamond gear after player names: sword, helmet, chestplate, leggings and boots")
     public static boolean extraDiamondGearIconsInTablist = true;
 
@@ -76,6 +87,7 @@ public class ExampleConfig {
             category = "Mega Walls",
             subCategory = "Item Tags",
             name = "Show Phoenix Tears",
+            dependsOn = "Enable Item Tags",
             comment = "Show tags for Phoenix's Tears of Regen")
     public static boolean showPhoenixTears = true;
 
@@ -83,6 +95,7 @@ public class ExampleConfig {
             category = "Mega Walls",
             subCategory = "Item Tags",
             name = "Show Squid Absorption",
+            dependsOn = "Enable Item Tags",
             comment = "Show tags for Squid's Absorption")
     public static boolean showSquidAbsorption = true;
 
@@ -90,6 +103,7 @@ public class ExampleConfig {
             category = "Mega Walls",
             subCategory = "Item Tags",
             name = "Show Regen-Ade",
+            dependsOn = "Enable Item Tags",
             comment = "Show tags for Regen-Ades")
     public static boolean showRegenAde = true;
 
@@ -97,6 +111,7 @@ public class ExampleConfig {
             category = "Mega Walls",
             subCategory = "Item Tags",
             name = "Show Milk Bucket",
+            dependsOn = "Enable Item Tags",
             comment = "Show tags for Ultra Pasteurized Milk Buckets")
     public static boolean showMilkBucket = true;
 
@@ -104,6 +119,7 @@ public class ExampleConfig {
             category = "Mega Walls",
             subCategory = "Item Tags",
             name = "Show Diamond Items",
+            dependsOn = "Enable Item Tags",
             comment = "Show tags for Diamonds, Diamond Swords and Diamond Armor")
     public static boolean showDiamondItems = true;
 
@@ -111,6 +127,7 @@ public class ExampleConfig {
             category = "Mega Walls",
             subCategory = "Item Tags",
             name = "Show Golden Apples",
+            dependsOn = "Enable Item Tags",
             comment = "Show tags for regular and enchanted Golden Apples")
     public static boolean showGoldenApples = true;
 
@@ -118,6 +135,7 @@ public class ExampleConfig {
             category = "Mega Walls",
             subCategory = "Item Tags",
             name = "Show Misc Items",
+            dependsOn = "Enable Item Tags",
             comment = "Show tags for Matey and Junk Apples")
     public static boolean showMiscItemTags = true;
 
@@ -125,6 +143,7 @@ public class ExampleConfig {
             category = "Mega Walls",
             subCategory = "Item Tags",
             name = "Show Distance",
+            dependsOn = "Enable Item Tags",
             comment = "Show the distance from you to each tagged item")
     public static boolean itemTagsShowDistance = true;
 
@@ -132,6 +151,7 @@ public class ExampleConfig {
             category = "Mega Walls",
             subCategory = "Item Tags",
             name = "Show Count",
+            dependsOn = "Enable Item Tags",
             comment = "Show the item stack count, such as x1 or x2")
     public static boolean itemTagsShowCount = true;
 
@@ -139,6 +159,7 @@ public class ExampleConfig {
             category = "Mega Walls",
             subCategory = "Item Tags",
             name = "Show Background",
+            dependsOn = "Enable Item Tags",
             comment = "Show a dark background behind item tags")
     public static boolean itemTagsShowBackground = true;
 
@@ -154,6 +175,7 @@ public class ExampleConfig {
             category = "Sleep Addon",
             subCategory = "HUD",
             name = "Mini Scoreboard background",
+            dependsOn = "Mini Scoreboard HUD",
             comment = "Draw a dark background behind the Mini Scoreboard HUD")
     public static boolean miniScoreboardBackground = true;
 
@@ -161,6 +183,7 @@ public class ExampleConfig {
             category = "Sleep Addon",
             subCategory = "HUD",
             name = "Team finals on Mini Scoreboard",
+            dependsOn = "Mini Scoreboard HUD",
             comment = "Include your team's final kills and final assists on the Mini Scoreboard")
     public static boolean miniScoreboardTeamFinals = true;
 
@@ -176,6 +199,7 @@ public class ExampleConfig {
             category = "Sleep Addon",
             subCategory = "HUD",
             name = "Closest Player background",
+            dependsOn = "Closest Player HUD",
             comment = "Draw a dark background behind the Closest Player HUD")
     public static boolean closestPlayerBackground = true;
 
@@ -207,6 +231,7 @@ public class ExampleConfig {
             category = "Sleep Addon",
             subCategory = "HUD",
             name = "Melee hits in Energy HUD",
+            dependsOn = "Energy display HUD",
             comment = "Append the hits needed to reach 100 energy to MWE's Energy HUD")
     public static boolean showMeleeHitsInEnergyHud = true;
 
@@ -214,6 +239,7 @@ public class ExampleConfig {
             category = "Squad",
             subCategory = "HUD",
             name = "Keep your first",
+            dependsOn = "Squad HUD",
             comment = "Keep your own row at the top of MWE's Squad HUD")
     public static boolean squadHudSelfFirst;
 

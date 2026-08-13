@@ -270,6 +270,7 @@ public final class Denick {
                     String current = MWEApi.Alias.getAlias(alias.uuid, alias.nickName);
                     if (alias.value.equals(current)) {
                         MWEApi.Alias.removeAlias(alias.uuid, alias.nickName);
+                        FeatureUtil.refreshName(alias.uuid);
                     }
                 } catch (RuntimeException ignored) {}
             }

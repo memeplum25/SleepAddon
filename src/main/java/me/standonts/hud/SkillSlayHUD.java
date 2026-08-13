@@ -137,7 +137,7 @@ public final class SkillSlayHUD extends AddonHud {
 
     private MWClass resolveClass(EntityPlayer player) {
         MWClass mwClass = MWEApi.Player.getPlayerInfo(player).getMWClass();
-        return mwClass == null ? MWClass.ofPlayer(player.getUniqueID()) : mwClass;
+        return mwClass == null ? MWClass.ofPlayer(player.getName()) : mwClass;
     }
 
     private boolean isEnemy(EntityPlayer target) {

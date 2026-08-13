@@ -45,6 +45,13 @@ public final class DiamondGearDetector {
             return "";
         }
         UUID uuid = UUID_BY_NAME.get(playerName.toLowerCase(Locale.ROOT));
+        return getExtraDiamondIcons(uuid);
+    }
+
+    public static String getExtraDiamondIcons(UUID uuid) {
+        if (!ExampleConfig.detectExtraDiamondGear) {
+            return "";
+        }
         Integer mask = uuid == null ? null : EXTRA_GEAR.get(uuid);
         return mask == null ? "" : iconsFor(mask);
     }
@@ -93,13 +100,19 @@ public final class DiamondGearDetector {
             MWClass mwClass = getPlayerClass(player);
             Integer expectedGear = mwClass == null ? null : CLASS_GEAR.get(mwClass);
             if (expectedGear == null) {
-                EXTRA_GEAR.remove(uuid);
+                Integer removedMask = EXTRA_GEAR.remove(uuid);
+                if (removedMask != null && removedMask != 0) {
+                    FeatureUtil.refreshName(uuid);
+                }
                 continue;
             }
 
             int oldMask = EXTRA_GEAR.containsKey(uuid) ? EXTRA_GEAR.get(uuid) : 0;
             int newMask = findUnexpectedGear(player, expectedGear);
             EXTRA_GEAR.put(uuid, newMask);
+            if (newMask != oldMask) {
+                FeatureUtil.refreshName(uuid);
+            }
             if (newMask != 0 && oldMask == 0 && ALERTED_PLAYERS.add(uuid)) {
                 sendAlert(player, newMask);
             }
@@ -111,9 +124,6 @@ public final class DiamondGearDetector {
 
     private MWClass getPlayerClass(EntityPlayer player) {
         MWClass mwClass = MWEApi.Player.getPlayerInfo(player).getMWClass();
-        if (mwClass == null) {
-            mwClass = MWClass.ofPlayer(player.getUniqueID());
-        }
         return mwClass == null ? MWClass.ofPlayer(player.getName()) : mwClass;
     }
 
@@ -143,8 +153,44 @@ public final class DiamondGearDetector {
 
     private static void sendAlert(EntityPlayer player, int mask) {
         String playerName = ScorePlayerTeam.formatPlayerName(player.getTeam(), player.getName());
-        FeatureUtil.sendMessage("Diamond Gear", EnumChatFormatting.AQUA,
-                playerName + EnumChatFormatting.GRAY + " has extra diamond gear: " + iconsFor(mask));
+
+        FeatureUtil.sendMessage(
+                "Diamond Gear",
+                EnumChatFormatting.AQUA,
+                playerName
+                        + EnumChatFormatting.GRAY
+                        + " has extra diamond gear: "
+                        + EnumChatFormatting.AQUA
+                        + gearTextFor(mask)
+        );
+    }
+
+    private static String gearTextFor(int mask) {
+        if (mask == 0) {
+            return "";
+        }
+
+        StringBuilder text = new StringBuilder();
+
+        appendGear(text, mask, BIT_SWORD, "Sword");
+        appendGear(text, mask, BIT_HELMET, "Helmet");
+        appendGear(text, mask, BIT_CHESTPLATE, "Chestplate");
+        appendGear(text, mask, BIT_LEGGINGS, "Leggings");
+        appendGear(text, mask, BIT_BOOTS, "Boots");
+
+        return text.toString();
+    }
+
+    private static void appendGear(StringBuilder text, int mask, int bit, String name) {
+        if ((mask & bit) == 0) {
+            return;
+        }
+
+        if (text.length() > 0) {
+            text.append(", ");
+        }
+
+        text.append(name);
     }
 
     private static String iconsFor(int mask) {
@@ -163,11 +209,15 @@ public final class DiamondGearDetector {
     }
 
     private void clearState() {
+        Set<UUID> affectedPlayers = new HashSet<>(EXTRA_GEAR.keySet());
         tickCounter = 0;
         active = false;
         EXTRA_GEAR.clear();
         UUID_BY_NAME.clear();
         ALERTED_PLAYERS.clear();
+        for (UUID uuid : affectedPlayers) {
+            FeatureUtil.refreshName(uuid);
+        }
     }
 
     private static Map<MWClass, Integer> createClassGear() {
