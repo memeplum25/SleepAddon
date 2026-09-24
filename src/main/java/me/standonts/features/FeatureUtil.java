@@ -56,7 +56,7 @@ final class FeatureUtil {
         if (MC.getNetHandler() != null) {
             NetworkPlayerInfo info = MC.getNetHandler().getPlayerInfo(uuid);
             if (info != null) {
-                PlayerDataManager.updatePlayerDataAndEntityData(info);
+                PlayerDataManager.refreshPlayerData(info);
                 return;
             }
         }
@@ -68,7 +68,7 @@ final class FeatureUtil {
 
     static void refreshAllNames() {
         if (MC.theWorld != null && MC.getNetHandler() != null) {
-            PlayerDataManager.refreshAllNamesInWorld();
+            PlayerDataManager.refreshAllPlayerData();
         }
     }
 

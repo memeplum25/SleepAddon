@@ -4,15 +4,14 @@ import fr.alexdoru.mwe.api.asm.IClassNodeTransformer;
 import fr.alexdoru.mwe.api.asm.InjectionCallback;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
 
 public final class NetworkManagerSendPacketTransformer implements IClassNodeTransformer {
 
     private static final String TARGET = "net.minecraft.network.NetworkManager";
     private static final String HOOK = "me/standonts/asm/hooks/GhostBlockFixHook";
+    private static final String PACKET_CLASS = "net/minecraft/network/Packet";
+    private static final String OBFUSCATED_PACKET_CLASS = "ff";
 
     @Override
     public String[] getTargetClassName() {
@@ -23,24 +22,18 @@ public final class NetworkManagerSendPacketTransformer implements IClassNodeTran
     public void transform(ClassNode classNode, InjectionCallback status) {
         status.setInjectionPoints(1);
         for (MethodNode method : classNode.methods) {
-            if (isSendPacket(method)) {
-                Type packetType = Type.getArgumentTypes(method.desc)[0];
-                InsnList hook = new InsnList();
-                hook.add(new VarInsnNode(ALOAD, 1));
-                hook.add(new MethodInsnNode(INVOKESTATIC, HOOK, "onSentPacket",
-                        "(" + packetType.getDescriptor() + ")V", false));
-                method.instructions.insertBefore(method.instructions.getFirst(), hook);
-                method.maxStack = Math.max(method.maxStack, 1);
-                status.addInjection();
-                return;
+            if (!isSendPacket(method)) {
+                continue;
             }
+            String packetDesc = Type.getArgumentTypes(method.desc)[0].getDescriptor();
+            HookInjector.callHookAtEntry(method, HOOK, "onSentPacket", 1, packetDesc);
+            status.addInjection();
+            return;
         }
     }
 
     private boolean isSendPacket(MethodNode method) {
-        if (!(method.name.equals("sendPacket")
-                || method.name.equals("func_179290_a")
-                || method.name.equals("a"))) {
+        if (!isSendPacketName(method.name)) {
             return false;
         }
         Type[] arguments = Type.getArgumentTypes(method.desc);
@@ -49,6 +42,13 @@ public final class NetworkManagerSendPacketTransformer implements IClassNodeTran
             return false;
         }
         String packetName = arguments[0].getInternalName();
-        return packetName.equals("net/minecraft/network/Packet") || packetName.equals("ff");
+        return packetName.equals(PACKET_CLASS) || packetName.equals(OBFUSCATED_PACKET_CLASS);
     }
+
+    private boolean isSendPacketName(String methodName) {
+        return methodName.equals("sendPacket")
+                || methodName.equals("func_179290_a")
+                || methodName.equals("a");
+    }
+
 }

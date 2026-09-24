@@ -5,19 +5,21 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @IFMLLoadingPlugin.MCVersion("1.8.9")
 public class AddonBootstrap implements IFMLLoadingPlugin {
 
+    private static final String ADDONS_KEY = "mwe.addons";
+    private static final String TRANSFORMERS_KEY = "mwe.transformers";
+
     public AddonBootstrap() {
         // TODO register your addon main class here
-        this.registerAddon("me.standonts.ExampleAddon");
+        appendToBlackboard(ADDONS_KEY, "me.standonts.ExampleAddon");
 
-        this.registerTransformer(
-                "me.standonts.asm.SquadHealthHudTransformer",
+        appendToBlackboard(TRANSFORMERS_KEY,
                 "me.standonts.asm.BaseLocationHudTransformer",
-                "me.standonts.asm.TabNameExtraInfoTransformer",
                 "me.standonts.asm.FinalKillCounterTransformer",
                 "me.standonts.asm.GhostBlockChangeTransformer",
                 "me.standonts.asm.NetworkManagerSendPacketTransformer",
@@ -49,18 +51,15 @@ public class AddonBootstrap implements IFMLLoadingPlugin {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private void registerAddon(String classname) {
-        Object o = Launch.blackboard.computeIfAbsent("mwe.addons", (k) -> new ArrayList<>());
-        if (o instanceof ArrayList) {
-            ((ArrayList) o).add(classname);
-        }
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private void registerTransformer(String... classnames) {
-        Object o = Launch.blackboard.computeIfAbsent("mwe.transformers", (k) -> new ArrayList<>());
-        if (o instanceof ArrayList) {
-            ((ArrayList) o).addAll(Arrays.asList(classnames));
+    private void appendToBlackboard(String key, String... classnames) {
+        Object o = Launch.blackboard.computeIfAbsent(key, (k) -> new ArrayList<>());
+        if (o instanceof List) {
+            List list = (List) o;
+            for (String classname : classnames) {
+                if (!list.contains(classname)) {
+                    list.add(classname);
+                }
+            }
         }
     }
 }

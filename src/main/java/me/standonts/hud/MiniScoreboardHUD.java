@@ -4,8 +4,12 @@ import me.standonts.config.ExampleConfig;
 import fr.alexdoru.mwe.api.MWEApi;
 import fr.alexdoru.mwe.api.enums.MWClass;
 import fr.alexdoru.mwe.api.enums.MWTeam;
+import fr.alexdoru.mwe.api.events.MegaWallsGameEvent;
+import fr.alexdoru.mwe.api.events.MegaWallsGameTimeEvent;
+import fr.alexdoru.mwe.api.events.WitherHealthDecayEvent;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -17,10 +21,8 @@ import java.util.regex.Pattern;
 
 public final class MiniScoreboardHUD extends AddonHud {
 
-    private static final Pattern GATES_OPEN = Pattern.compile("Gates Open:\\s*(\\d{1,2}:\\d{2})");
-    private static final Pattern WALLS_FALL = Pattern.compile("Walls Fall:\\s*(\\d{1,2}:\\d{2})");
-    private static final Pattern ENRAGE_OFF = Pattern.compile("Enrage Off:\\s*(\\d{1,2}:\\d{2})");
-    private static final Pattern GAME_END = Pattern.compile("Game End:\\s*(\\d{1,2}:\\d{2})");
+    private static final Pattern GAME_PHASE = Pattern.compile(
+            "(Gates Open|Walls Fall|Enrage Off|Game End):\\s*(\\d{1,2}:\\d{2})");
     private static final Pattern WITHER_HP = Pattern.compile("\\[([BGRY])\\]\\s*Wither HP:\\s*([\\d,]+)");
     private static final Pattern TEAM_PLAYERS = Pattern.compile(
             "\\[([BGRY])\\]\\s*(?:Players?\\s*:\\s*([\\d,]+)|([\\d,]+)\\s*Players?)");
@@ -36,10 +38,31 @@ public final class MiniScoreboardHUD extends AddonHud {
     private static final String VALUE = EnumChatFormatting.WHITE.toString();
 
     private final WitherEtaEstimator etaEstimator = new WitherEtaEstimator();
+    private final Map<MWTeam, Integer> decayedWitherHealth = new EnumMap<>(MWTeam.class);
+    private String gameTime;
     private String displayText = "";
 
     public MiniScoreboardHUD() {
         super(ExampleConfig.miniScoreboardPosition);
+    }
+
+    @SubscribeEvent
+    public void onGameEvent(MegaWallsGameEvent event) {
+        if (event.type == MegaWallsGameEvent.Type.CONNECT
+                || event.type == MegaWallsGameEvent.Type.DISCONNECT) {
+            decayedWitherHealth.clear();
+            gameTime = null;
+        }
+    }
+
+    @SubscribeEvent
+    public void onWitherHealthDecay(WitherHealthDecayEvent event) {
+        decayedWitherHealth.put(event.team, event.health);
+    }
+
+    @SubscribeEvent
+    public void onGameTime(MegaWallsGameTimeEvent event) {
+        gameTime = String.format(Locale.ROOT, "%02d:%02d", event.time / 60, event.time % 60);
     }
 
     @Override
@@ -69,7 +92,7 @@ public final class MiniScoreboardHUD extends AddonHud {
     @Override
     public void renderDummy() {
         String text = EnumChatFormatting.GOLD.toString() + EnumChatFormatting.BOLD + "Walls Fall"
-                + EnumChatFormatting.RESET + VALUE + ":00:04" + SEPARATOR
+                + EnumChatFormatting.RESET + VALUE + ":00:04" + SEPARATOR + LABEL + "Time" + VALUE + ":03:24" + SEPARATOR
                 + EnumChatFormatting.BLUE + "B" + VALUE + ":1000" + LABEL + "HP(2) "
                 + EnumChatFormatting.GREEN + "G" + VALUE + ":1000" + LABEL + "HP(3) "
                 + EnumChatFormatting.RED + "R" + VALUE + ":1000" + LABEL + "HP(2) "
@@ -111,28 +134,10 @@ public final class MiniScoreboardHUD extends AddonHud {
         List<MWTeam> order = new ArrayList<>();
 
         for (String line : lines) {
-            String value = matchGroup(GATES_OPEN, line);
-            if (value != null) {
-                phaseLabel = "Gates Open";
-                phaseTime = value;
-                continue;
-            }
-            value = matchGroup(WALLS_FALL, line);
-            if (value != null) {
-                phaseLabel = "Walls Fall";
-                phaseTime = value;
-                continue;
-            }
-            value = matchGroup(ENRAGE_OFF, line);
-            if (value != null) {
-                phaseLabel = "Enrage Off";
-                phaseTime = value;
-                continue;
-            }
-            value = matchGroup(GAME_END, line);
-            if (value != null) {
-                phaseLabel = "Game End";
-                phaseTime = value;
+            Matcher phase = GAME_PHASE.matcher(line);
+            if (phase.find()) {
+                phaseLabel = phase.group(1);
+                phaseTime = phase.group(2);
                 continue;
             }
 
@@ -162,6 +167,12 @@ public final class MiniScoreboardHUD extends AddonHud {
             }
         }
 
+        for (Map.Entry<MWTeam, Integer> entry : decayedWitherHealth.entrySet()) {
+            if (!teams.containsKey(entry.getKey())) {
+                addTeam(order, entry.getKey());
+                teams.put(entry.getKey(), new TeamValue(entry.getValue(), true));
+            }
+        }
         if (order.isEmpty()) {
             order.add(MWTeam.BLUE);
             order.add(MWTeam.GREEN);
@@ -192,10 +203,16 @@ public final class MiniScoreboardHUD extends AddonHud {
             }
         }
 
-        return EnumChatFormatting.GOLD.toString() + EnumChatFormatting.BOLD + phaseLabel
-                + EnumChatFormatting.RESET + VALUE + ':' + phaseTime + SEPARATOR + teamText
-                + SEPARATOR + LABEL + "FKs" + VALUE + ':' + finals + ' '
-                + LABEL + "FKAs" + VALUE + ':' + assists;
+        StringBuilder text = new StringBuilder();
+        text.append(EnumChatFormatting.GOLD).append(EnumChatFormatting.BOLD).append(phaseLabel)
+                .append(EnumChatFormatting.RESET).append(VALUE).append(':').append(phaseTime);
+        if (ExampleConfig.miniScoreboardGameTime && gameTime != null) {
+            text.append(SEPARATOR).append(LABEL).append("Time").append(VALUE).append(':').append(gameTime);
+        }
+        return text.append(SEPARATOR).append(teamText)
+                .append(SEPARATOR).append(LABEL).append("FKs").append(VALUE).append(':').append(finals)
+                .append(' ').append(LABEL).append("FKAs").append(VALUE).append(':').append(assists)
+                .toString();
     }
 
     private String buildPregameText(List<String> lines) {
@@ -324,48 +341,4 @@ public final class MiniScoreboardHUD extends AddonHud {
         }
     }
 
-    private static final class WitherEtaEstimator {
-        private MWTeam team;
-        private int previousHealth = -1;
-        private long previousUpdate;
-        private double damagePerSecond;
-
-        private int update(MWTeam currentTeam, int health, long now) {
-            if (team != currentTeam) {
-                reset();
-                team = currentTeam;
-            }
-            if (previousHealth < 0) {
-                previousHealth = health;
-                previousUpdate = now;
-                return -1;
-            }
-            if (health != previousHealth) {
-                long elapsed = now - previousUpdate;
-                if (health < previousHealth && elapsed >= 100L && elapsed <= 10_000L) {
-                    double instantRate = (previousHealth - health) * 1000.0D / elapsed;
-                    damagePerSecond = damagePerSecond == 0.0D
-                            ? instantRate : damagePerSecond * 0.7D + instantRate * 0.3D;
-                } else if (health > previousHealth) {
-                    damagePerSecond = 0.0D;
-                }
-                previousHealth = health;
-                previousUpdate = now;
-            }
-            if (damagePerSecond < 0.05D) {
-                return -1;
-            }
-            if (now - previousUpdate > 5_000L) {
-                return -1;
-            }
-            return Math.min(5999, (int) Math.ceil(health / damagePerSecond));
-        }
-
-        private void reset() {
-            team = null;
-            previousHealth = -1;
-            previousUpdate = 0L;
-            damagePerSecond = 0.0D;
-        }
-    }
 }

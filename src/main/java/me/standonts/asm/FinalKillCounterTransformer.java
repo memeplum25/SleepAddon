@@ -35,8 +35,12 @@ public final class FinalKillCounterTransformer implements IClassNodeTransformer 
                 if (call.getOpcode() == INVOKEVIRTUAL
                         && "java/util/regex/Matcher".equals(call.owner)
                         && "find".equals(call.name) && "()Z".equals(call.desc)) {
+                    String descriptor = "(Z)Z";
+                    if (HookInjector.hasStaticCall(method, HOOK, "allowMessageMatch", descriptor)) {
+                        return;
+                    }
                     method.instructions.insert(call, new MethodInsnNode(INVOKESTATIC, HOOK,
-                            "allowMessageMatch", "(Z)Z", false));
+                            "allowMessageMatch", descriptor, false));
                     status.addInjection();
                     return;
                 }

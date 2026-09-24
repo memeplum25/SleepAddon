@@ -4,6 +4,42 @@ All notable changes to Std Addon are documented here.
 
 Std Addon 的主要变更记录在此文件中。
 
+## [1.1] - 2026-09-17
+
+### 中文
+
+#### 兼容性 (MWE 4.8)
+
+- 适配 MWE 4.8：更新 `PlayerDataManager` 与 `NameFormatter` 中被重命名的方法。
+- Tablist 扩展信息改用 MWE 4.8 公开的 `ITabNameModifier` API，取代旧的 ASM 注入，不再依赖 MWE 内部类结构。
+- Mini Scoreboard HUD 在侧边栏未列出某支队伍时，回填 `WitherHealthDecayEvent` 提供的 Wither 血量。
+- 目标环境更新为 Minecraft Forge 1.8.9、MWE 4.8、Java 8。
+
+#### HUD
+
+- Mini Scoreboard HUD 新增游戏时间显示。
+
+#### 配置
+
+- 新增配置项 `miniScoreboardGameTime`（分类 `Sleep Addon` → `HUD`），用于开关 Mini Scoreboard HUD 上的游戏时间。
+
+### English
+
+#### Compatibility (MWE 4.8)
+
+- Adapted to MWE 4.8 by updating the renamed methods in `PlayerDataManager` and `NameFormatter`.
+- Tablist suffixes now use the public `ITabNameModifier` API from MWE 4.8 instead of the previous ASM injection, so they no longer depend on MWE internals.
+- Mini Scoreboard HUD backfills Wither health from `WitherHealthDecayEvent` when the sidebar does not list a team.
+- Target environment updated to Minecraft Forge 1.8.9, MWE 4.8, and Java 8.
+
+#### HUDs
+
+- Mini Scoreboard HUD shows the elapsed game time.
+
+#### Configuration
+
+- Added the `miniScoreboardGameTime` option (category `Sleep Addon` → `HUD`) to toggle the game time displayed on the Mini Scoreboard HUD.
+
 ## [1.0] - 2026-08-11
 
 ### 中文

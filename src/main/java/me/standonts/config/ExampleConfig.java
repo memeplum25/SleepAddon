@@ -190,6 +190,14 @@ public class ExampleConfig {
     @ConfigProperty(
             category = "Sleep Addon",
             subCategory = "HUD",
+            name = "Game time on Mini Scoreboard",
+            dependsOn = "Mini Scoreboard HUD",
+            comment = "Include the elapsed game time on the Mini Scoreboard")
+    public static boolean miniScoreboardGameTime = true;
+
+    @ConfigProperty(
+            category = "Sleep Addon",
+            subCategory = "HUD",
             name = "Closest Player HUD",
             comment = "Displays the closest visible player from each Mega Walls team")
     public static final RendererPosition closestPlayerPosition =
@@ -238,9 +246,24 @@ public class ExampleConfig {
     @ConfigProperty(
             category = "Squad",
             subCategory = "HUD",
-            name = "Keep your first",
+            name = "Distance on Squad HUD",
             dependsOn = "Squad HUD",
-            comment = "Keep your own row at the top of MWE's Squad HUD")
-    public static boolean squadHudSelfFirst;
+            comment = "Show the distance and a direction arrow to each squadmate on MWE's Squad HUD")
+    public static boolean squadHudDistance = true;
+
+    @ConfigProperty(
+            category = "Mega Walls",
+            subCategory = "Auto Craft",
+            name = "Enable Auto Craft",
+            comment = "Add one click crafting buttons next to the crafting table GUI")
+    public static boolean autoCraftEnabled = true;
+
+    @ConfigProperty(
+            category = "Mega Walls",
+            subCategory = "Auto Craft",
+            name = "Craftable status badge",
+            dependsOn = "Enable Auto Craft",
+            comment = "Show whether you carry the ingredients of a button as a green check or a red cross")
+    public static boolean autoCraftStatusBadge = true;
 
 }

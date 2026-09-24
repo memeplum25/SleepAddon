@@ -4,10 +4,7 @@ import fr.alexdoru.mwe.api.asm.IClassNodeTransformer;
 import fr.alexdoru.mwe.api.asm.InjectionCallback;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
 
 public final class GhostBlockChangeTransformer implements IClassNodeTransformer {
 
@@ -24,29 +21,19 @@ public final class GhostBlockChangeTransformer implements IClassNodeTransformer 
     public void transform(ClassNode classNode, InjectionCallback status) {
         status.setInjectionPoints(2);
         for (MethodNode method : classNode.methods) {
-            if (isPacketHook(method, "onBlockChange")) {
+            if (HookInjector.isVoidMethodWithOneArg(method, "onBlockChange")) {
                 inject(method, "onBlockChange");
                 status.addInjection();
-            } else if (isPacketHook(method, "onMultiBlockChange")) {
+            } else if (HookInjector.isVoidMethodWithOneArg(method, "onMultiBlockChange")) {
                 inject(method, "onMultiBlockChange");
                 status.addInjection();
             }
         }
     }
 
-    private boolean isPacketHook(MethodNode method, String name) {
-        return method.name.equals(name)
-                && Type.getArgumentTypes(method.desc).length == 1
-                && Type.getReturnType(method.desc).getSort() == Type.VOID;
+    private void inject(MethodNode method, String hookMethod) {
+        String packetDesc = Type.getArgumentTypes(method.desc)[0].getDescriptor();
+        HookInjector.callHookAtEntry(method, HOOK, hookMethod, 0, packetDesc);
     }
 
-    private void inject(MethodNode method, String hookMethod) {
-        Type packetType = Type.getArgumentTypes(method.desc)[0];
-        InsnList hook = new InsnList();
-        hook.add(new VarInsnNode(ALOAD, 0));
-        hook.add(new MethodInsnNode(INVOKESTATIC, HOOK, hookMethod,
-                "(" + packetType.getDescriptor() + ")V", false));
-        method.instructions.insertBefore(method.instructions.getFirst(), hook);
-        method.maxStack = Math.max(method.maxStack, 1);
-    }
 }

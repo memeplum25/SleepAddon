@@ -35,9 +35,12 @@ public final class EnergyDisplayHudTransformer implements IClassNodeTransformer 
             if (!isFinalDisplayString(instruction)) {
                 continue;
             }
+            String descriptor = "(Ljava/lang/String;)Ljava/lang/String;";
+            if (HookInjector.hasStaticCall(method, HOOK, hookMethod, descriptor)) {
+                continue;
+            }
             method.instructions.insert(instruction, new MethodInsnNode(
-                    INVOKESTATIC, HOOK, hookMethod,
-                    "(Ljava/lang/String;)Ljava/lang/String;", false));
+                    INVOKESTATIC, HOOK, hookMethod, descriptor, false));
             status.addInjection();
         }
     }
